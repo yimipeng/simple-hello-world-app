@@ -6,6 +6,8 @@ COPY . .
 
 RUN pip install -r requirement.txt
 
+RUN opentelemetry-bootstrap --action=install
+
 EXPOSE 8000
 
 ENV HOME=/
