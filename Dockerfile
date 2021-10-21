@@ -10,6 +10,6 @@ EXPOSE 8000
 
 ENV HOME=/
 
-ENV OTEL_RESOURCE_ATTRIBUTES='service.name=My App Runner service'
+ENV OTEL_RESOURCE_ATTRIBUTES='service.name=My App Runner service for AutoInstr Test'
 
-CMD python3 hello.py
+CMD OTEL_PROPAGATORS=xray OTEL_PYTHON_ID_GENERATOR=xray opentelemetry-instrument python3 hello.py
