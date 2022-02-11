@@ -1,6 +1,6 @@
+from __future__ import print_function
 import boto3
 from flask import Flask
-from __future__ import print_function
 import os
 import time
 import json 
