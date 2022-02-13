@@ -1,4 +1,3 @@
-from __future__ import print_function
 import boto3
 from flask import Flask
 import os
@@ -29,6 +28,17 @@ from opentelemetry.sdk.extension.aws.trace.propagation.aws_xray_format import (
 
 from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
+
+# # Helper class to convert a DynamoDB item to JSON.
+# class DecimalEncoder(json.JSONEncoder):
+#     def default(self, o):
+#         if isinstance(o, decimal.Decimal):
+#             if o % 1 > 0:
+#                 return float(o)
+#             else:
+#                 return int(o)
+#         return super(DecimalEncoder, self).default(o)
+
     
 otlp_exporter = OTLPSpanExporter(endpoint="http://localhost:4317")
 span_processor = BatchSpanProcessor(otlp_exporter)
@@ -72,8 +82,9 @@ def hello_world():
         )
     except ClientError as e:
         print(e.response['Error']['Message'])
-    else:
-        print("GetItem succeeded:")
+    # else:
+    #     print("GetItem succeeded:")
+        # print(json.dumps(response['Item'], indent=4, cls=DecimalEncoder))
     return 'Thanks for using AWS App Runner!'
 @app.route('/health')
 def health_check():
@@ -94,5 +105,6 @@ def call_http():
 if __name__ == '__main__':
     app.run(threaded=True, host="0.0.0.0", debug=True, port=int(os.environ.get("PORT", 8000)))
     
+
 
     
