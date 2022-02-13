@@ -39,7 +39,7 @@ from botocore.exceptions import ClientError
 #                 return int(o)
 #         return super(DecimalEncoder, self).default(o)
 
-    
+
 otlp_exporter = OTLPSpanExporter(endpoint="http://localhost:4317")
 span_processor = BatchSpanProcessor(otlp_exporter)
 trace.set_tracer_provider(TracerProvider(active_span_processor=span_processor, id_generator=AwsXRayIdGenerator()))
@@ -55,11 +55,6 @@ RequestsInstrumentor().instrument()
 FlaskInstrumentor().instrument_app(app)
 
 
-dynamodb = boto3.resource("dynamodb", region_name='us-east-1')
-
-table = dynamodb.Table('ProductCatalog')
-
-
 def convert_otel_trace_id_to_xray(otel_trace_id_decimal):
     otel_trace_id_hex = "{:032x}".format(otel_trace_id_decimal)
     x_ray_trace_id = TRACE_ID_DELIMITER.join(
@@ -71,17 +66,27 @@ def convert_otel_trace_id_to_xray(otel_trace_id_decimal):
     )
     return '{{"traceId": "{}"}}'.format(x_ray_trace_id)
 
+def query_products(id, dynamodb=None):
+    if not dynamodb:
+        # dynamodb = boto3.resource('dynamodb', endpoint_url="http://localhost:8000")
+        dynamodb = boto3.resource("dynamodb", region_name='us-east-1')
+
+    table = dynamodb.Table('ProductCatalog')
+    response = table.query(
+        KeyConditionExpression=Key('Id').eq(id)
+    )
+    return response['Items']
 
 @app.route('/')
 def hello_world():
-    try:
-        response = table.get_item(
-            Key={
-                'pk': "0"
-            }
-        )
-    except ClientError as e:
-        print(e.response['Error']['Message'])
+    # try:
+    #     response = table.get_item(
+    #         Key={
+    #             'pk': "0"
+    #         }
+    #     )
+    # except ClientError as e:
+    #     print(e.response['Error']['Message'])
     # else:
     #     print("GetItem succeeded:")
         # print(json.dumps(response['Item'], indent=4, cls=DecimalEncoder))
@@ -103,8 +108,8 @@ def call_http():
 
 
 if __name__ == '__main__':
+    query_products(0)
     app.run(threaded=True, host="0.0.0.0", debug=True, port=int(os.environ.get("PORT", 8000)))
-    
 
 
     
