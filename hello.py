@@ -13,7 +13,8 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.sdk.extension.aws.trace import AwsXRayIdGenerator
 
 from opentelemetry import propagate
-from opentelemetry.sdk.extension.aws.trace.propagation.aws_xray_format import AwsXRayFormat
+# from opentelemetry.sdk.extension.aws.trace.propagation.aws_xray_format import AwsXRayFormat
+from opentelemetry.propagators.aws import AwsXRayPropagator
 
 from opentelemetry.instrumentation.botocore import BotocoreInstrumentor
 from opentelemetry.instrumentation.requests import RequestsInstrumentor
@@ -30,7 +31,8 @@ otlp_exporter = OTLPSpanExporter(endpoint="http://localhost:4317")
 span_processor = BatchSpanProcessor(otlp_exporter)
 trace.set_tracer_provider(TracerProvider(active_span_processor=span_processor, id_generator=AwsXRayIdGenerator()))
 
-propagate.set_global_textmap(AwsXRayFormat())
+# propagate.set_global_textmap(AwsXRayFormat())
+propagate.set_global_textmap(AwsXRayPropagator())
 
 app = Flask(__name__)
 
